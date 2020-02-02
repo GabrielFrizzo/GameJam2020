@@ -34,4 +34,22 @@ class Player {
       default: return Icons.cloud_upload;
     }
   }
+
+  String classTitle() {
+    switch (classe) {
+      case PlayerClass.ambientalista: return 'Ambientalista - Plante Árvores!';
+      case PlayerClass.cultista: return 'Cultista - Fogo em Tudo!';
+      case PlayerClass.ditador: return 'Ditador - Conquiste seus súditos!';
+      case PlayerClass.fanaticoReligioso: return 'Fanático Religioso - Converta-os todos!';
+      default: return 'Repare a Sociedade!';
+    }
+  }
+
+  int neededScore() {
+    if (classe == PlayerClass.ambientalista) return 5;
+    if (classe == PlayerClass.cultista) return 10;
+    if (classe == PlayerClass.ditador) return 8;
+    if (classe == PlayerClass.fanaticoReligioso) return 2;
+    return 0;
+  }
 }

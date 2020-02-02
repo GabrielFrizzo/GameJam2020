@@ -7,6 +7,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> names = [];
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -66,24 +68,52 @@ class HomePage extends StatelessWidget {
                         hintText: 'Jogador 1',
                         icon: Icon(Icons.person),
                       ),
+                      onSaved: (name) => names.add(name),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Favor insira um nome!';
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
                         hintText: 'Jogador 2',
                         icon: Icon(Icons.person),
                       ),
+                      onSaved: (name) => names.add(name),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Favor insira um nome!';
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
                         hintText: 'Jogador 3',
                         icon: Icon(Icons.person),
                       ),
+                      onSaved: (name) => names.add(name),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Favor insira um nome!';
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
                         hintText: 'Jogador 4',
                         icon: Icon(Icons.person),
                       ),
+                      onSaved: (name) => names.add(name),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Favor insira um nome!';
+                        }
+                        return null;
+                      },
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -92,12 +122,8 @@ class HomePage extends StatelessWidget {
                       child: FlatButton(
                         onPressed: () {
                           if (_formKey.currentState.validate()) {
-                            GameState initialState = GameState([
-                              'Frizzo',
-                              'Jambs',
-                              'Milkinho',
-                              'Milkao'
-                            ]); // colocar os nomes de verdade
+                            _formKey.currentState.save();
+                            GameState initialState = GameState(names);
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(

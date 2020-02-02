@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:psycho_repair/gameState.dart';
 import 'package:psycho_repair/player.dart';
 import 'package:psycho_repair/transitionPage.dart';
+import 'package:psycho_repair/winningPage.dart';
 
 class GamePage extends StatefulWidget {
   final gameState;
@@ -27,7 +26,7 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Repare a Sociedade!'),
+          title: Text(currPlayer.classTitle()),
           backgroundColor: currPlayer.color),
       backgroundColor: Color(0xFFE0E0E0),
       body: Column(
@@ -107,7 +106,7 @@ class _GamePageState extends State<GamePage> {
                                       color: Colors.white, fontSize: 20),
                                 ),
                                 Text(
-                                  '3/4',
+                                  '${score(currPlayer.classe)}/${currPlayer.neededScore()}',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20),
                                 ),
@@ -122,7 +121,8 @@ class _GamePageState extends State<GamePage> {
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['Dominar', 'Construir', 'Espiar', 'Apágua']
+                    // children: ['Dominar', 'Construir', 'Espiar']
+                    children: dominateTitle(currPlayer.classe)
                         .map((title) => buildActionButton(context, title))
                         .toList(),
                   ),
@@ -133,6 +133,15 @@ class _GamePageState extends State<GamePage> {
         ],
       ),
     );
+  }
+
+  List<String> dominateTitle(PlayerClass classe) {
+    if (classe == PlayerClass.ambientalista) return ['Plantar', 'Apagar Fogo'];
+    if (classe == PlayerClass.cultista) return ['Queimar'];
+    if (classe == PlayerClass.ditador) return ['Recrutar', 'Apagar Fogo'];
+    if (classe == PlayerClass.fanaticoReligioso)
+      return ['Converter', 'Apagar Fogo'];
+    return ['Dominar', 'Apagar Fogo'];
   }
 
   Widget buildGridTile(int index, int currTurn, List<Player> players) {
@@ -157,7 +166,7 @@ class _GamePageState extends State<GamePage> {
     }
 
     if (gameState.board[index] == GameTile.fogo) {
-      _color = Colors.red;
+      if (_color == Colors.green) _color = Colors.red;
       _icon = tileIcon(GameTile.fogo);
     }
     return Container(
@@ -189,7 +198,7 @@ class _GamePageState extends State<GamePage> {
               currPlayer.position.y -= 1;
               break;
             case 'down':
-              if (_x >= 5) return;
+              if (_y >= 5) return;
               currPlayer.position.y += 1;
               break;
             default:
@@ -214,7 +223,13 @@ class _GamePageState extends State<GamePage> {
       width: 130,
       child: RaisedButton(
         onPressed: () {
-          handleAction(context);
+          final pos = currPlayer.position;
+          if (title == 'Apagar Fogo' &&
+              gameState.board[xyToIndex(pos.x, pos.y)] == GameTile.fogo) {
+            gameState.board[xyToIndex(pos.x, pos.y)] = GameTile.terrenoBaldio;
+            handleAction(context);
+          } else if (dominate(currPlayer.classe, currPlayer.position))
+            handleAction(context);
         },
         child: Text(
           '$title',
@@ -232,12 +247,22 @@ class _GamePageState extends State<GamePage> {
     setState(() => actionsTaken += 1);
     if (actionsTaken >= 3) {
       gameState.nextTurn();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (BuildContext context) =>
-              TransitionPage(gameState: gameState),
-        ),
-      );
+      final winner = gameState.gameWinner();
+      if (winner != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                WinningPage(name: currPlayer.name),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                TransitionPage(gameState: gameState),
+          ),
+        );
+      }
     }
   }
 
@@ -251,19 +276,31 @@ class _GamePageState extends State<GamePage> {
         return FontAwesomeIcons.tree;
       case GameTile.casa:
         return FontAwesomeIcons.home;
-      case GameTile.comicio:
-        return FontAwesomeIcons.chessKing;
+      case GameTile.crentes:
+        return FontAwesomeIcons.pray;
       case GameTile.fogo:
         return FontAwesomeIcons.fire;
       case GameTile.igreja:
         return FontAwesomeIcons.cross;
       case GameTile.terrenoBaldio:
-        return FontAwesomeIcons.flag;
-      case GameTile.terreiro:
-        return FontAwesomeIcons.bookDead;
+        return FontAwesomeIcons.seedling;
+      case GameTile.suditos:
+        return FontAwesomeIcons.chessPawn;
       default:
         return Icons.cloud_upload;
     }
+  }
+
+  bool dominate(PlayerClass classe, Position pos) {
+    return gameState.transform(pos, classe);
+  }
+
+  int score(PlayerClass classe) {
+    if (classe == PlayerClass.ambientalista) return gameState.numTrees();
+    if (classe == PlayerClass.cultista) return gameState.numFires();
+    if (classe == PlayerClass.ditador) return gameState.numSubjects();
+    if (classe == PlayerClass.fanaticoReligioso) return gameState.numChurches();
+    return 0;
   }
 
   // Color tileColor(index) {
