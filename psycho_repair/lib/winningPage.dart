@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psycho_repair/homePage.dart';
 
 class WinningPage extends StatelessWidget {
   final String name;
@@ -51,6 +52,26 @@ class WinningPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Container(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: FlatButton(
+                  padding: const EdgeInsets.all(8),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              HomePage(),
+                        ));
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(width: 2)),
+                  color: Colors.transparent,
+                  child: Text('Nova rodada',
+                      style: TextStyle(fontSize: 38)),
+                ),
+              ),
                 ],
               ),
             ],
